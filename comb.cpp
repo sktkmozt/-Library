@@ -94,9 +94,7 @@ int main(){
     ll ans=0;
     rep(i,0,N+1){
         if(i%2==0) ans+=(cb.P(M-i,N-i)*cb.comb(N,i))%inf;
-        else{
-            ans+=inf-(cb.P(M-i,N-i)*cb.comb(N,i))%inf;
-        }
+        else ans+=inf-(cb.P(M-i,N-i)*cb.comb(N,i))%inf;
         ans%=inf;
     }
     ans*=cb.P(M,N);
