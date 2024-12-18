@@ -62,7 +62,6 @@ struct BIT{
                 i-=i&(-i);
             }
         }
-        j++;
         while(j!=0){
             res+=node.at(j);
             j-=j&(-j);
