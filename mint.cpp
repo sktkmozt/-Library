@@ -126,8 +126,6 @@ int main(){
     vector<mint> sum(N,0);
     sum.at(0)=1;
     sum.at(1)=-1;
-    mint x=4;
-    mint y=2;
     rep(i,0,N-1){
         mint p=a.at(i)+mint(1);
         p=mint(1)/p;
