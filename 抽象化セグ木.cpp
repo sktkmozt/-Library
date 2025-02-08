@@ -1,9 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
-
-
 #define rep(i,a,b) for(ll i=a;i<b;i++)
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
+#define all(a,i,j) a.begin()+i,a.begin()+j
 #define ll long long
 #define ull unsigned long long
 #define ld long double
@@ -11,42 +10,47 @@ using namespace std;
 #define se second
 #define vel vector<long long>
 #define vvel vector<vector<long long>>
+#define vem vector<mint>
+#define vvem vector<vector<mint>>
 #define pll pair<ll,ll>
 #define vepll vector<pll>
-#define ves vector<string>
-#define PI 3.141592653589793
 #define cleout(i) cout << fixed << setprecision(i)
-//               上  右 下 左
-vector<int> dx={ -1, 0, 1, 0 };
-vector<int> dy={ 0, 1, 0, -1 };
+//                上 右 下 左
+vector<int> dx={ -1, 0, 1, 0};
+vector<int> dy={ 0, 1, 0, -1};
 
-vector<int> ddx={ 1, 1, 1, 0, -1, -1, -1, 0 };
-vector<int> ddy={ 1, 0, -1, -1, -1, 0, 1, 1 };
-
-ll N, K, M, L, T, Q, H, W, i, j, l;
+ll N, K, M, L, R, Q, H, W, i, j, k, l;
 ll x, y, z;
-unsigned long long q;
-string S;
-long double k;
-
+string S,T;
+vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};//(1<<61)-1も素数
 ll inf=998244353;
 // inf=1e9+7;
 // LLONG_MAX
 
-ld f(pll x,pll y){
-    return sqrt((x.fi-y.fi)*(x.fi-y.fi)+(x.se-y.se)*(x.se-y.se));
-}
+/*座圧
+    vel A=a;
+    sort(all(a,0,a.size()));
+    a.erase(unique(all(a,0,a.size())),a.end());
+    rep(i,0,A.size()) A.at(i)=lower_bound(all(a,0,a.size()),A.at(i))-a.begin();
+    swap(A,a);
+*/
 
-template<typename T>
+struct Combine {
+    inline int operator()(int a, int b)const{
+        return a + b;
+    }
+};
+
+template<typename T, typename Combine>
 struct seg{
     int N;
-    using F=function<T(T,T)>;//多分これが関数の型ってやつ
-    F combine;
+    Combine combine;
     T id;
     vector<T> node;
+    int sz;
 
-    seg(vector<T> &a,F com,T ident){
-        int sz=a.size();
+    seg(vector<T> &a,Combine com,T ident){
+        sz=a.size();
         combine=com;
         id=ident;
         ll m=1;
@@ -60,7 +64,7 @@ struct seg{
         }
         N=m;
     }
-    void chan(int i,T x){//i番目をxに変える
+    inline void chan(int i,T x){//i番目をxに変える
         i+=N-1;
         node[i]=x;
         while(i>0){
@@ -69,45 +73,67 @@ struct seg{
             node[i]=combine(node[2*i+1],node[2*i+2]);
         }
     }
-    T  Ique(int a,int b,int now=0,int l=0,int r=-1){//[a,b)のmin
-        if(r==-1) r=N;//aのsixeからn出すの無水から
-        if(r<=a||b<=l) return id;//かすりなし
-        if(a<=l&&r<=b) return node[now];//おおわれてるとき
-        T al=Ique(a,b,2*now+1,l,(l+r)/2); 
-        T ar=Ique(a,b,2*now+2,(l+r)/2,r);
-        return combine(al,ar);
+    inline T  Ique(int l,int r){//[a,b)のmin
+        T resl=id,resr=id;
+        l+=N-1;
+        r+=N-1;
+        while(l<r){
+            if(!(l&1)){//左のほうの右側なので
+                resl=combine(resl,node[l]);
+                l--;
+            }
+            if(!(r&1)){//半開区間なのでrが右だといい
+                r--;
+                resr=combine(node[r],resr);
+            }
+            l/=2;
+            r/=2;
+        }
+        return combine(resl,resr);
     }
-    T  Ique(ll a,ll b){
-        return Ique(a,b,0,0,-1);
+
+    inline int upper(T x){
+        int now=0;
+        T res=id;
+        if(node.at(now)<x){
+            return sz;
+        }
+        while(now<N-1){
+            if(combine(res,node[2*now+1])<=x){
+                res=combine(res,node[2*now+1]);
+                now++;
+                now*=2;
+            }else{
+                now*=2;
+                now++;
+            }
+        }
+        return now-(N-1);
     }
 };
 
-
-int main() {
-    cin>>N>>K;
-    pll s;
-    cin>>s.fi>>s.se;
-    vepll a(N);
-    rep(i,0,N) cin>>a.at(i).fi>>a.at(i).se;
-    vector<ll> dp(N,0);
-    dp.at(0)=0;
+int main(){
+    cin>>N;
+    vel p(N);
+    vvel b(N);
+    rep(i,0,N) cin>>p.at(i);
+    vector<ll> dp(N,1);
 
 
     ///セグ木初期化パート
-    auto combine=[](ll a,ll b){return a+b;};
     ll id=0;
-    seg<ll> st(dp,combine,id);
-    ///
+    seg<ll,Combine> st(dp,Combine(),id);
 
-    rep(i,1,N){
-        dp.at(i)=st.Ique(max((ll)0,i-K),i,0,0,-1)+f(s,a.at(i-1))+f(s,a.at(i))-f(a.at(i-1),a.at(i));
-        st.chan(i,dp.at(i));
+
+    vel ans(N,0);
+    rrep(i,N,0){
+        ll ok=st.upper(p.at(i)-1);
+        ans.at(ok)=i;
+        st.chan(ok,0);
     }
-    ld ans=f(s,a.at(0));
-    rep(i,0,N-1){
-        ans+=f(a.at(i),a.at(i+1));
-    }
-    ans+=f(a.at(N-1),s);
-    cleout(16);
-    cout<<ans+st.Ique(N-K,N);
+    rep(i,0,N) cout<<ans.at(i)+1<<" ";
 }
+
+/*
+g++ a.cpp -std=c++20
+*/
