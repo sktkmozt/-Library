@@ -110,6 +110,12 @@ struct mint{
         os << m.num;
         return os;
     }
+    friend istream& operator>>(istream& is, mint& m) {
+        ll x;
+        is>>x;
+        m=mint(x);
+        return is;
+    }
 };
 
 
