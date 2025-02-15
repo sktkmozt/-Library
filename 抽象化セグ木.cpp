@@ -36,8 +36,8 @@ ll inf=998244353;
 */
 
 struct Combine {
-    inline int operator()(int a, int b)const{
-        return a + b;
+    inline ll operator()(ll a,ll b){
+        return max(a,b);
     }
 };
 
@@ -95,7 +95,7 @@ struct seg{
     inline int upper(T x){
         int now=0;
         T res=id;
-        if(node.at(now)<x){
+        if(node.at(now)<=x){
             return sz;
         }
         while(now<N-1){
@@ -113,25 +113,35 @@ struct seg{
 };
 
 int main(){
-    cin>>N;
-    vel p(N);
-    vvel b(N);
-    rep(i,0,N) cin>>p.at(i);
-    vector<ll> dp(N,1);
-
+    cin>>N>>Q;
+    vel a(N);
+    rep(i,0,N) cin>>a.at(i);
+    vel dp(N,1e18);
 
     ///セグ木初期化パート
-    ll id=0;
+    ll id=-1e18;
     seg<ll,Combine> st(dp,Combine(),id);
 
-
-    vel ans(N,0);
-    rrep(i,N,0){
-        ll ok=st.upper(p.at(i)-1);
-        ans.at(ok)=i;
-        st.chan(ok,0);
+    map<ll,ll> ma;
+    vvel q(Q,vel(3));
+    rep(i,0,Q){
+        cin>>q.at(i).at(0)>>q.at(i).at(1);
+        q.at(i).at(2)=i;
     }
-    rep(i,0,N) cout<<ans.at(i)+1<<" ";
+    sort(all(q,0,q.size()));
+    ll ind=0;
+    rep(i,0,N){
+        if(ind>=q.size()) break;
+        x=st.upper(a.at(i)-1);
+        st.chan(x,a.at(i));
+        while(ind<q.size()&&q.at(ind).at(0)-1<=i){
+            ma[q.at(ind).at(2)]=st.upper(q.at(ind).at(1));
+            ind++;
+        }
+    }
+    for(auto it=ma.begin();it!=ma.end();it++){
+        cout<<it->se<<endl;
+    }
 }
 
 /*
