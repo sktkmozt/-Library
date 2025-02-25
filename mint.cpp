@@ -100,7 +100,7 @@ struct mint{
         return *this*other.inv();
     }
     mint &operator/=(const mint &other){
-        num=(num*other.num)%inf;
+        num=(num*other.inv())%inf;
         return *this;
     }
     operator ll()const{

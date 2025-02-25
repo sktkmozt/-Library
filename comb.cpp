@@ -2,6 +2,7 @@
 using namespace std;
 #define rep(i,a,b) for(ll i=a;i<b;i++)
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
+#define all(a,i,j) a.begin()+i,a.begin()+j
 #define ll long long
 #define ull unsigned long long
 #define ld long double
@@ -9,94 +10,131 @@ using namespace std;
 #define se second
 #define vel vector<long long>
 #define vvel vector<vector<long long>>
+#define vem vector<mint>
+#define vvem vector<vector<mint>>
 #define pll pair<ll,ll>
 #define vepll vector<pll>
-#define ves vector<string>
-#define PI 3.141592653589793
 #define cleout(i) cout << fixed << setprecision(i)
-//               上  右 下 左
-vector<int> dx={ -1, 0, 1, 0 };
-vector<int> dy={ 0, 1, 0, -1 };
+//                上 右 下 左
+vector<int> dx={ -1, 0, 1, 0};
+vector<int> dy={ 0, 1, 0, -1};
 
-vector<int> ddx={ 1, 1, 1, 0, -1, -1, -1, 0 };
-vector<int> ddy={ 1, 0, -1, -1, -1, 0, 1, 1 };
-
-ll N, K, M, L, R, T, Q, H, W, i, j, l;
+ll N, K, M, L, R, Q, H, W, i, j, k, l;
 ll x, y, z;
-unsigned long long q;
-string S;
-long double k;
-vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
+string S,T;
+vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};//(1<<61)-1も素数
 ll inf=998244353;
 // inf=1e9+7;
 // LLONG_MAX
 
-//座圧
-//sort(a.begin(),a.end());
-//a.erase(unique(a.begin(),a.end()),a.end());
+/*座圧
+    vel A=a;
+    sort(all(a,0,a.size()));
+    a.erase(unique(all(a,0,a.size())),a.end());
+    rep(i,0,A.size()) A.at(i)=lower_bound(all(a,0,a.size()),A.at(i))-a.begin();
+    swap(A,a);
+*/
 
-ll inv(ll a,ll inf){
-    bitset<60> s(inf-2);
-    vel b(60);
-    b.at(0)=a;
-    b.at(0)%=inf;
-    rep(i,1,60){
-        b.at(i)=b.at(i-1)*b.at(i-1);
-        b.at(i)%=inf;
-    }
-    ll ans=1;
-    rep(i,0,60){
-        if(s.test(i)){
-            ans*=b.at(i);
-            ans%=inf;
+struct mint{
+    ll num;
+    mint(ll x=0){
+        if(x<0){
+            x*=-1;
+            x%=inf;
+            x=inf-x;
         }
+        x%=inf;
+        num=x;
     }
-    return ans;
-}
-
-struct CB{
-    vel n,r;
-    ll inf;
-    CB(int N,ll INF){//N以下のものをmod INFで返す
-        inf=INF;
-        n.assign(N+1,1);
-        r.assign(N+1,1);
-        rep(i,2,N+1){
-            n.at(i)=n.at(i-1)*i;
-            n.at(i)%=inf;
+    mint operator+(const mint &other)const{
+        return mint(num+other.num);
+    }
+    mint operator-(const mint &other)const{
+        return mint(num-other.num);
+    }
+    mint operator*(const mint &other)const{
+        return mint(num*other.num);
+    }
+    mint &operator+=(const mint &other){
+        num+=other.num;
+        if(num>=inf) num-=inf;
+        return *this;
+    }
+    mint &operator-=(const mint &other){
+        num-=other.num;
+        if(num<0) num+=inf;
+        return *this;
+    }
+    mint &operator*=(const mint &other){
+        num=(num*other.num)%inf;
+        return *this;
+    }
+    mint beki(const mint &x)const{
+        mint res=1;
+        mint now=num;
+        rep(i,0,60){
+            if(x.num&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
         }
-        rep(i,1,N+1) r.at(i)=inv(n.at(i),inf);
-        n.at(0)=1;
-        r.at(0)=1;
-    }
-    ll comb(ll N,ll R){//NCR
-        ll res=n.at(N);
-        res*=r.at(N-R);
-        res%=inf;
-        res*=r.at(R);
-        res%=inf;
         return res;
     }
-    ll P(ll N,ll R){//NPR
-        ll res=n.at(N);
-        res*=r.at(N-R);
-        res%=inf;
+    mint inv()const{
+        mint res=1;
+        mint now=num;
+        rep(i,0,30){
+            if((inf-2)&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
+        }
         return res;
+    }
+    mint operator/(const mint &other)const{
+        return *this*other.inv();
+    }
+    mint &operator/=(const mint &other){
+        num=(num*other.inv())%inf;
+        return *this;
+    }
+    operator ll()const{
+        return (ll)(num);
+    }
+    friend ostream& operator<<(ostream& os, const mint& m) {
+        os << m.num;
+        return os;
+    }
+    friend istream& operator>>(istream& is, mint& m) {
+        ll x;
+        is>>x;
+        m=mint(x);
+        return is;
     }
 };
 
-
+struct CB{
+    vem n,r;
+    CB(ll N){//N以下のものをmod INFで返す
+        n.assign(N+1,1);
+        r.assign(N+1,1);
+        rep(i,2,N+1){
+            n.at(i)=n.at(i-1)*mint(i);
+        }
+        rep(i,1,N+1) r.at(i)=n.at(i).inv();
+    }
+    mint comb(ll N,ll R){//NCR
+        if(N<R) return 0;
+        return n.at(N)*r.at(R)*r.at(N-R);
+    }
+    mint P(ll N,ll R){//NPR
+        return n.at(N)*r.at(N-R);
+    }
+};
 
 int main(){
-    inf=1e9+7;
-    cin>>N>>M;
-    CB cb(M,inf);
-    ll ans=0;
-    rep(i,0,N+1){
-        if(i%2==0) ans+=(cb.P(M-i,N-i)*cb.comb(N,i))%inf;
-        else ans+=inf-(cb.P(M-i,N-i)*cb.comb(N,i))%inf;
-        ans%=inf;
-    }
-    ans*=cb.P(M,N);
-    cout<<ans%inf;
 }
+
+/*
+g++ a.cpp -std=c++20
+*/
