@@ -204,30 +204,28 @@ struct seg{
 };
 
 int main(){
-    cin>>N>>S;
+    cin>>N>>Q>>S;
+    vel ans;
     vector<pair<mint,mint>> a(S.size(),{1,1});
     rep(i,1,S.size()){
         a.at(i).fi=a.at(i-1).fi*base;
         a.at(i).se=a.at(i-1).se/base;
     }
     seg hash(a,S);
-    if(hash.hash(0,N)==hash.rhash(N,2*N)){
-        cout<<S.substr(0,N)<<endl;
-        cout<<N;
-        return 0;
-    }
-    rrep(i,N,0){
-        mint l=hash.hash(0,i)+a.at(i).fi*hash.hash(i+N,2*N);
-        mint r=hash.rhash(i,i+N);
-        if(l==r){
-            T=S.substr(i,N);
-            reverse(T.begin(),T.end());
-            cout<<T<<endl;
-            cout<<i<<endl;
-            return 0;
+    rep(q,0,Q){
+        cin>>x;
+        if(x==1){
+            char c;
+            cin>>x>>c;
+            x--;
+            hash.chan(x,c);
+        }else{
+            cin>>x>>y;
+            x--;
+            ans.push_back(hash.hash(x,y)==hash.rhash(x,y));
         }
     }
-    cout<<-1;
+    rep(i,0,ans.size()) cout<<(ans.at(i)==1?"Yes":"No")<<endl;
 }
 /*
 g++ a.cpp -std=c++20
