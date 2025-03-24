@@ -117,125 +117,113 @@ struct mint{
 
 mint base=114514;
 
-struct Combine {
-    inline mint operator()(mint a,mint b){
-        return a+b;
-    }
-};
+using P = pair<mint, mint>;
 
-template<typename T, typename Combine>
 struct seg{
     int N;
-    Combine combine;
-    T id;
-    vector<T> node;
-    int sz;
+    vector<P> node;
+    vector<P> A;
 
-    seg(vector<T> &a,Combine com,T ident){
-        sz=a.size();
-        combine=com;
-        id=ident;
-        ll m=1;
-        while(m<sz) m*=2;
-        node.resize(2*m,id);
-        rep(i,0,sz){
-            node[i+m]=a[i];
-        }
-        rrep(i,m,1){
-            node[i]=combine(node[2*i],node[2*i+1]);
-        }
+    seg(const vector<P> &a,string &S) {
+        int sz=a.size();
+        int m=1;
+        while(m<sz)m*=2;
         N=m;
-    }
-    inline void chan(int i,T x){//i番目をxに変える
-        i+=N;
-        node[i]*=x;
-        while(i>0){
-            i/=2;
-            node[i]=combine(node[2*i],node[2*i+1]);
+        A.assign(sz,{mint(0),mint(0)});
+        A=a;
+        node.assign(2*m,{mint(0),mint(0)});
+        for(int i=0;i<sz;i++){
+            node[i+m]=a[i];
+            node[i+m].fi*=(mint)(S.at(i)-'A'+1);
+            node[i+m].se*=(mint)(S.at(i)-'A'+1);
+        }
+        for(int i=m-1;i>=1;i--){
+            node[i]={node[2*i].first+node[2*i+1].first,node[2*i].second+node[2*i+1].second};
         }
     }
-    inline T  Ique(int l,int r){//[a,b)のmin
-        T resl=id,resr=id;
-        l+=N;
-        r+=N;
+    void chan(int i,const char &c) {
+        i+=N;
+        node[i].fi=A.at(i-N).fi*(mint)(c-'A'+1);
+        node[i].se=A.at(i-N).se*(mint)(c-'A'+1);
+        for(i/=2;i>=1;i/=2) {
+            node[i]={node[2*i].first+node[2*i+1].first,node[2*i].second+node[2*i+1].second};
+        }
+    }
+    P Ique(int l, int r) {
+        P resLeft={mint(0),mint(0)},resRight={mint(0),mint(0)};
+        l+=N;r+=N;
         while(l<r){
-            if(l&1){//左のほうの右側なので
-                resl=combine(resl,node[l]);
+            if(l&1){
+                resLeft.first+=node[l].first;
+                resLeft.second+=node[l].second;
                 l++;
             }
-            if(r&1){//半開区間なのでrが右だといい
+            if(r&1){
                 r--;
-                resr=combine(node[r],resr);
+                resRight.first+=node[r].first;
+                resRight.second+=node[r].second;
             }
-            l/=2;
-            r/=2;
+            l/=2;r/=2;
         }
-        return combine(resl,resr);
+        return {resLeft.first+resRight.first,resLeft.second+resRight.second};
     }
-
-    inline int upper(T x){
-        int now=1;
-        T res=id;
-        if(node[now]<=x){
-            return sz;
-        }
-        while(now<N){
-            if(combine(res,node[2*now])<=x){
-                res=combine(res,node[2*now]);
-                now*=2;
-                now++;
-            }else{
-                now*=2;
+    mint hash(int l, int r) {
+        mint rev=A.at(l).se;
+        mint resLeft=mint(0),resRight=mint(0);
+        l+=N;r+=N;
+        while(l<r){
+            if(l&1){
+                resLeft+=node[l].first;
+                l++;
             }
+            if(r&1){
+                r--;
+                resRight+=node[r].first;
+            }
+            l/=2;r/=2;
         }
-        return now-N;
+        return (resLeft+resRight)*rev;
+    }
+    mint rhash(int l, int r) {
+        mint rev=A.at(r-1).fi;
+        mint resLeft=mint(0),resRight=mint(0);
+        l+=N;r+=N;
+        while(l<r){
+            if(l&1){
+                resLeft+=node[l].se;
+                l++;
+            }
+            if(r&1){
+                r--;
+                resRight+=node[r].se;
+            }
+            l/=2;r/=2;
+        }
+        return (resLeft+resRight)*rev;
     }
 };
 
 int main(){
     cin>>N>>S;
-    char c='a'-1;
-    vem a(2*N,1);
-    mint now=base;
-    rep(i,1,2*N){
-        a.at(i)=a.at(i-1)*base;
+    vector<pair<mint,mint>> a(S.size(),{1,1});
+    rep(i,1,S.size()){
+        a.at(i).fi=a.at(i-1).fi*base;
+        a.at(i).se=a.at(i-1).se/base;
     }
-    ///セグ木初期化パート
-    mint id=0;
-    seg<mint,Combine> hash(a,Combine(),id);
-    seg<mint,Combine> rhash(a,Combine(),id);
-    seg<mint,Combine> res(a,Combine(),id);
-    rep(i,0,2*N){
-        x=S.at(i)-'a';
-        x++;
-        res.chan(i,x);
-    }
-    rep(i,0,N){
-        x=S.at(i)-'a';
-        x++;
-        hash.chan(i,x);
-        rhash.chan(N-1-i,x);
-    }
-    if(res.Ique(0ll,2*N)==hash.Ique(0ll,N)+a.at(N)*rhash.Ique(0ll,N)){
-        rep(j,0,N) cout<<S.at(j);
-        cout<<endl<<N;
+    seg hash(a,S);
+    if(hash.hash(0,N)==hash.rhash(N,2*N)){
+        cout<<S.substr(0,N)<<endl;
+        cout<<N;
         return 0;
     }
-    mint plus=0;
-    rrep(i,N,0){//i文字目をi+N文字目にする
-        mint x=S.at(i)-'a';
-        x+=1;
-        mint div=1;
-        rhash.chan(N-1-i,div/x);
-        x=S.at(i+N)-'a';
-        x+=1;
-        rhash.chan(N-1-i,x);
-        plus+=a.at(i)*a.at(N)*(mint)x;
-        if(res.Ique(0ll,2*N)==hash.Ique(0ll,i)+plus+a.at(i)*rhash.Ique(0ll,N)){
-            rep(j,0,i)cout<<S.at(j);
-            rep(j,i+N,2*N) cout<<S.at(j);
-            cout<<endl;
-            cout<<i;
+    rrep(i,N,0){
+        mint l=hash.hash(0,i)+a.at(i).fi*hash.hash(i+N,2*N);
+        mint r=hash.rhash(i,i+N);
+        if(l==r){
+            T=S.substr(i,N);
+            reverse(T.begin(),T.end());
+            cout<<T<<endl;
+            cout<<i<<endl;
             return 0;
         }
     }
