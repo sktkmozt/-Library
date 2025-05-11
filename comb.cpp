@@ -2,8 +2,8 @@
 using namespace std;
 #define rep(i,a,b) for(ll i=a;i<b;i++)
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
-#define all(a,i,j) a.begin()+i,a.begin()+j
 #define ll long long
+#define bl __int128_t
 #define ull unsigned long long
 #define ld long double
 #define fi first
@@ -14,18 +14,20 @@ using namespace std;
 #define vvem vector<vector<mint>>
 #define pll pair<ll,ll>
 #define vepll vector<pll>
+#define vvepll vector<vepll>
 #define cleout(i) cout << fixed << setprecision(i)
 //                上 右 下 左
 vector<int> dx={ -1, 0, 1, 0};
 vector<int> dy={ 0, 1, 0, -1};
 
-ll N, K, M, L, R, Q, H, W, i, j, k, l;
-ll x, y, z;
-string S,T;
-vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};//(1<<61)-1も素数
-ll inf=998244353;
-// inf=1e9+7;
-// LLONG_MAX
+ll N,K,M,L,R,T,Q,H,W,i,j,k,l;
+ll x,y,z;
+string S,SS;
+vel mod={998244353,1000000007,1000000009,1000000021,1000000033};//(1<<61)-1も素数
+ll p=998244353;
+// p=1000000007;
+ll inf=1000000000000000000;//1e18
+// inf=LLONG_MAX
 
 /*座圧
     vel A=a;
@@ -37,14 +39,18 @@ ll inf=998244353;
 
 struct mint{
     ll num;
+    static ll P;
     mint(ll x=0){
         if(x<0){
             x*=-1;
-            x%=inf;
-            x=inf-x;
+            x%=P;
+            x=P-x;
         }
-        x%=inf;
+        x%=P;
         num=x;
+    }
+    static void set_mod(ll PP) {
+        P=PP;
     }
     mint operator+(const mint &other)const{
         return mint(num+other.num);
@@ -57,23 +63,23 @@ struct mint{
     }
     mint &operator+=(const mint &other){
         num+=other.num;
-        if(num>=inf) num-=inf;
+        if(num>=P) num-=P;
         return *this;
     }
     mint &operator-=(const mint &other){
         num-=other.num;
-        if(num<0) num+=inf;
+        if(num<0) num+=P;
         return *this;
     }
     mint &operator*=(const mint &other){
-        num=(num*other.num)%inf;
+        num=(num*other.num)%P;
         return *this;
     }
-    mint beki(const mint &x)const{
+    mint beki(const ll &x)const{
         mint res=1;
         mint now=num;
         rep(i,0,60){
-            if(x.num&(1ll<<i)){
+            if(x&(1ll<<i)){
                 res*=now;
             } 
             now*=now;
@@ -83,8 +89,8 @@ struct mint{
     mint inv()const{
         mint res=1;
         mint now=num;
-        rep(i,0,30){
-            if((inf-2)&(1ll<<i)){
+        rep(i,0,60){
+            if((P-2)&(1ll<<i)){
                 res*=now;
             } 
             now*=now;
@@ -95,7 +101,7 @@ struct mint{
         return *this*other.inv();
     }
     mint &operator/=(const mint &other){
-        num=(num*other.inv())%inf;
+        num=(num*other.inv())%P;
         return *this;
     }
     operator ll()const{
@@ -112,6 +118,7 @@ struct mint{
         return is;
     }
 };
+ll mint::P=p;
 
 struct CB{
     vem n,r;
@@ -121,7 +128,8 @@ struct CB{
         rep(i,2,N+1){
             n.at(i)=n.at(i-1)*mint(i);
         }
-        rep(i,1,N+1) r.at(i)=n.at(i).inv();
+        r.back()=n.back().inv();
+        rrep(i,N,0) r.at(i)=r.at(i)*(mint)(i+1);
     }
     mint comb(ll N,ll R){//NCR
         if(N<R) return 0;
