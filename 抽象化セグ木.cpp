@@ -72,6 +72,16 @@ struct seg{
             node[i]=combine(node[2*i],node[2*i+1]);
         }
     }
+
+    inline void add(int i,T x){//i番目をxに変える
+        i+=N;
+        node[i]+=x;
+        while(i>0){
+            i/=2;
+            node[i]=combine(node[2*i],node[2*i+1]);
+        }
+    }
+
     inline T  Ique(int l,int r){//[a,b)のmin
         T resl=id,resr=id;
         l+=N;
