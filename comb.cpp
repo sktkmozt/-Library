@@ -129,7 +129,7 @@ struct CB{
             n.at(i)=n.at(i-1)*mint(i);
         }
         r.back()=n.back().inv();
-        rrep(i,N,0) r.at(i)=r.at(i)*(mint)(i+1);
+        rrep(i,N,0) r.at(i)=r.at(i+1)*(mint)(i+1);
     }
     mint comb(ll N,ll R){//NCR
         if(N<R) return 0;
