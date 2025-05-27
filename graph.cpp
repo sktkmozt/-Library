@@ -47,7 +47,7 @@ struct graph{
         size=n;
         vertex.assign(size,{});
     }
-    void add(ll x,ll y,ll to=inf){//有向辺
+    void add(ll x,ll y,ll to=1){//有向辺
         vertex.at(x).push_back(edge.size());
         edge.push_back({x,y});
         cost.push_back(to);
@@ -109,7 +109,7 @@ struct graph{
         while(!pq.empty()){
             pll now=pq.top();
             pq.pop();
-            if(ret.at(now.fi)!=now.fi)continue;
+            if(ret.at(now.se)!=now.fi)continue;
             for(auto y:vertex.at(now.se)){
                 ll nnow=edge.at(y).se;
                 ll cst=cost.at(y);
