@@ -43,9 +43,11 @@ struct graph{
     vepll edge;
     vel cost;
     vepll mergin;
+    vel iter;
     graph(ll n){
         size=n;
         vertex.assign(size,{});
+        iter.assign(size,0);
     }
     void add(ll x,ll y,ll to=1){//有向辺
         vertex.at(x).push_back(edge.size());
@@ -127,7 +129,8 @@ struct graph{
             return f;
         }
         ll cnt=0;
-        for(auto y:vertex.at(now)){
+        for(ll &i=iter.at(now);i<vertex.at(now).size();i++){
+            ll y=vertex.at(now).at(i);
             ll nnow=edge.at(y).se;
             if(dist.at(nnow)>dist.at(now)){
                 ll mgn=(y%2==0?mergin.at(y/2).fi:mergin.at(y/2).se);
@@ -143,6 +146,7 @@ struct graph{
                     mergin.at(y/2).se-=flow;
                 }
                 cnt+=flow;
+                if(f==0)break;
             }
         }
         return cnt;
@@ -152,37 +156,58 @@ struct graph{
         while(1){
             vel dist=bfs(s,true);
             if(dist.at(g)==inf)break;
-            ll f=dfs_flow(dist,s,g,inf);
-            flow+=f;
+            iter.assign(size,0);
+            while(1){
+                ll f=dfs_flow(dist,s,g,inf);
+                flow+=f;
+                if(f==0)break;
+            }
         }
         return flow;
     }
 };
 
+bool c(pll now){
+    return 0<=now.fi&&now.fi<N&&0<=now.se&&now.se<N;
+}
+
+ll f(pll now){
+    return now.fi*N+now.se;
+}
+
 int main(){
-    cin>>H>>W>>N;
-    graph G(H+W+2*N+2);//0=s
-                       //1~H
-                       //H+1~H+N
-                       //H+N+1~H+2*N
-                       //H+2*N+1~H+W+2*N
-                       //H+W+2*N+1
-    rep(i,1,H+1){
-        G.add_flow(0,i);
-    }
-    rep(i,1,W+1){
-        G.add_flow(H+2*N+i,H+W+2*N+1);
+    cin>>N;
+    ll M=N*N+2;
+    graph G(M);
+    vvel a(N,vel(N));
+    rep(i,0,N){
+        cin>>S;
+        rep(j,0,N){
+            a.at(i).at(j)=((S.at(j)=='B')+(i+j)%2)%2;
+            if(S.at(j)=='?')a.at(i).at(j)=2;
+        }
     }
     rep(i,0,N){
-        ll w;
-        cin>>x>>y>>z>>w;
-        rep(j,x,z+1){
-            G.add_flow(j,H+i+1);
-        }
-        G.add_flow(i+H+1,i+H+N+1);
-        rep(j,y,w+1){
-            G.add_flow(i+H+N+1,H+2*N+j);
+        rep(j,0,N){
+            rep(k,0,4){
+                pll now={i,j};
+                pll nnow={i,j};
+                nnow.fi+=dx.at(k);
+                nnow.se+=dy.at(k);
+                if(c(nnow)){
+                    G.add_flow(f(now),f(nnow));
+                }
+            }
         }
     }
-    cout<<G.flow(0,H+W+2*N+1);
+    rep(i,0,N){
+        rep(j,0,N){
+            if(a.at(i).at(j)==1){
+                G.add_flow(f({i,j}),N*N+1,inf);
+            }else if(a.at(i).at(j)==0){
+                G.add_flow(N*N,f({i,j}),inf);
+            }
+        }
+    }
+    cout<<(N-1)*N+(N-1)*N-G.flow(N*N,N*N+1);
 }
