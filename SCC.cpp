@@ -44,7 +44,7 @@ struct SCC{
     vvel eq;//DAGの各頂点に何があるのか
     vel Id;//各頂点はDAGのどこにあるのか
     vepll rev;
-    ll N;
+    ll N,n;
 
     void dfs0(vel &seen,ll now,ll &cnt){
         seen.at(now)=1;
@@ -94,7 +94,7 @@ struct SCC{
                 eq.push_back(v);
             }
         }
-        ll n=eq.size();
+        n=eq.size();
         DAG.assign(n,{});
         rep(i,0,N){
             for(auto y:G.at(i)){
@@ -108,39 +108,74 @@ struct SCC{
         }
         return ;
     }
+
+    vel two_sat(){
+        vel res(N/2);
+        queue<ll> qu;
+        vel indeg(n,0);
+        vel rnk(N,-1);
+        rep(i,0,n){
+            for(auto y:DAG.at(i))indeg.at(y)++;
+        }
+        rep(i,0,n){
+            if(indeg.at(i)==0)qu.push(i);
+        }
+        ll cnt=0;
+        while(!qu.empty()){
+            x=qu.front();
+            qu.pop();
+            rep(i,0,eq.at(x).size())rnk.at(eq.at(x).at(i))=cnt;
+            for(auto y:DAG.at(x)){
+                indeg.at(y)--;
+                if(indeg.at(y)==0)qu.push(y);
+            }
+            cnt++;
+        }
+        rep(i,0,N/2){
+            res.at(i)=rnk.at(i)>rnk.at(i+N/2);
+            if(rnk.at(i)==rnk.at(i+N/2)&&rnk.at(i)!=-1)res.at(i)=-1;
+        }
+        return res;
+    }
 };
 
 int main(){
-    cin>>N>>M;
-    vvel G(N);
-    rep(i,0,M){
-        cin>>x>>y;
-        G.at(x).push_back(y);
+    ll D;
+    cin>>N>>D;
+    vepll a(N);
+    rep(i,0,N)cin>>a.at(i).fi>>a.at(i).se;
+    vvel G(2*N);
+    rep(i,0,N){
+        rep(j,i+1,N){
+            if(abs(a.at(i).fi-a.at(j).fi)<D){
+                G.at(i).push_back(j+N);
+                G.at(j).push_back(i+N);
+            }
+            if(abs(a.at(i).fi-a.at(j).se)<D){
+                G.at(i).push_back(j);
+                G.at(j+N).push_back(i+N);
+            }
+            if(abs(a.at(i).se-a.at(j).fi)<D){
+                G.at(i+N).push_back(j+N);
+                G.at(j).push_back(i);
+            }
+            if(abs(a.at(i).se-a.at(j).se)<D){
+                G.at(i+N).push_back(j);
+                G.at(j+N).push_back(i);
+            }
+        }
     }
     SCC scc(G);
-    vvel dag=scc.DAG;
-    vvel eq=scc.eq;
-    queue<ll> qu;
-    N=dag.size();
-    vel indeg(N,0);
+    vel res=scc.two_sat();
     rep(i,0,N){
-        for(auto y:dag.at(i)){
-            indeg.at(y)++;
+        if(res.at(i)==-1){
+            cout<<"No";
+            return 0;
         }
     }
+    cout<<"Yes"<<endl;
     rep(i,0,N){
-        if(indeg.at(i)==0)qu.push(i);
-    }
-    cout<<N<<endl;
-    while(!qu.empty()){
-        x=qu.front();
-        qu.pop();
-        cout<<eq.at(x).size()<<" ";
-        rep(i,0,eq.at(x).size())cout<<eq.at(x).at(i)<<" ";
-        cout<<endl;
-        for(auto y:dag.at(x)){
-            indeg.at(y)--;
-            if(indeg.at(y)==0)qu.push(y);
-        }
+        if(res.at(i)==0)cout<<a.at(i).se<<endl;
+        else cout<<a.at(i).fi<<endl;
     }
 }
