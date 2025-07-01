@@ -132,50 +132,59 @@ struct SCC{
             cnt++;
         }
         rep(i,0,N/2){
-            res.at(i)=rnk.at(i)>rnk.at(i+N/2);
-            if(rnk.at(i)==rnk.at(i+N/2)&&rnk.at(i)!=-1)res.at(i)=-1;
+            res.at(i)=rnk.at(i*2)<rnk.at(i*2+1);
+            if(rnk.at(i*2)==rnk.at(i*2+1)&&rnk.at(i*2)!=-1)res.at(i)=-1;
         }
         return res;
     }
 };
+
+struct two_sat{
+    vvel G;
+    vel ans;
+    ll N;
+    two_sat(ll n){
+        N=n;
+        G.assign(2*N,{});
+    }
+    void add(ll i,ll j,bool f,bool g){//(iがf)or(jがg)でa->bのときは(a,b,false,true)にする
+        G.at(2*i+!f).push_back(2*j+g);
+        G.at(2*j+!g).push_back(2*i+f);
+    }
+    bool solve(){
+        SCC scc(G);
+        ans=scc.two_sat();
+        rep(i,0,N){
+            if(ans.at(i)==-1)return false;
+        }
+        return true;
+    }
+};
+
+ll f(ll x){
+    if(x<N)return x+N;
+    return x-N;
+}
 
 int main(){
     ll D;
     cin>>N>>D;
     vepll a(N);
     rep(i,0,N)cin>>a.at(i).fi>>a.at(i).se;
-    vvel G(2*N);
+    two_sat ts(N);
     rep(i,0,N){
         rep(j,i+1,N){
-            if(abs(a.at(i).fi-a.at(j).fi)<D){
-                G.at(i).push_back(j+N);
-                G.at(j).push_back(i+N);
-            }
-            if(abs(a.at(i).fi-a.at(j).se)<D){
-                G.at(i).push_back(j);
-                G.at(j+N).push_back(i+N);
-            }
-            if(abs(a.at(i).se-a.at(j).fi)<D){
-                G.at(i+N).push_back(j+N);
-                G.at(j).push_back(i);
-            }
-            if(abs(a.at(i).se-a.at(j).se)<D){
-                G.at(i+N).push_back(j);
-                G.at(j+N).push_back(i);
-            }
+            if(abs(a.at(i).fi-a.at(j).fi)<D)ts.add(i,j,1,1);
+            if(abs(a.at(i).fi-a.at(j).se)<D)ts.add(i,j,1,0);
+            if(abs(a.at(i).se-a.at(j).fi)<D)ts.add(i,j,0,1);
+            if(abs(a.at(i).se-a.at(j).se)<D)ts.add(i,j,0,0);
         }
     }
-    SCC scc(G);
-    vel res=scc.two_sat();
-    rep(i,0,N){
-        if(res.at(i)==-1){
-            cout<<"No";
-            return 0;
-        }
-    }
-    cout<<"Yes"<<endl;
-    rep(i,0,N){
-        if(res.at(i)==0)cout<<a.at(i).se<<endl;
-        else cout<<a.at(i).fi<<endl;
+    if(!ts.solve()){
+        cout<<"No";
+    }else{
+        cout<<"Yes"<<endl;
+        vel ans=ts.ans;
+        rep(i,0,N)cout<<(ans.at(i)==0?a.at(i).fi:a.at(i).se)<<endl;
     }
 }
