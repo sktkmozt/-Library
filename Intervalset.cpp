@@ -174,6 +174,7 @@ struct Intervalset{
     }
 };
 
+
 int main(){
     cin>>N>>Q;
     Intervalset se;
