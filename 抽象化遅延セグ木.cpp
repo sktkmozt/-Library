@@ -4,7 +4,6 @@ using namespace std;
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
 #define ll long long
 #define bl __int128_t
-#define ull unsigned long long
 #define ld long double
 #define fi first
 #define se second
@@ -15,44 +14,124 @@ using namespace std;
 #define pll pair<ll,ll>
 #define vepll vector<pll>
 #define vvepll vector<vepll>
+#define pmm pair<mint,mint>
+#define vepmm vector<pmm>
+#define vvepmm vector<vepmm>
 #define cleout(i) cout << fixed << setprecision(i)
 //                上 右 下 左
 vector<int> dx={ -1, 0, 1, 0};
 vector<int> dy={ 0, 1, 0, -1};
 
-ll N,K,M,L,R,T,Q,H,W,i,j,k,l;
+ll N,K,M,L,R,T,Q,H,W,l,r;
 ll x,y,z;
-string S,SS;
+string S;
 vel mod={998244353,1000000007,1000000009,1000000021,1000000033};//(1<<61)-1も素数
 ll p=998244353;
-// p=1000000007;
+//ll p=1000000007;
 ll inf=1000000000000000000;//1e18
-// inf=LLONG_MAX
+//ll inf=LLONG_MAX
 
-/*座圧
-    vel A=a;
-    sort(a.begin(),a.end());
-    a.erase(unique(a.begin(),a.end()),a.end());
-    rep(i,0,A.size()) A.at(i)=lower_bound(a.begin(),a.end(),A.at(i))-a.begin();
-    swap(A,a);
-*/
+struct mint{
+    ll num;
+    bool c=true;
+    static ll P;
+    mint(ll x=0){
+        if(x<0){
+            x*=-1;
+            x%=P;
+            x=P-x;
+        }
+        x%=P;
+        num=x;
+    }
+    static void set_mod(ll PP) {
+        P=PP;
+    }
+    mint operator+(const mint &other)const{
+        return mint(num+other.num);
+    }
+    mint operator-(const mint &other)const{
+        return mint(num-other.num);
+    }
+    mint operator*(const mint &other)const{
+        return mint(num*other.num);
+    }
+    mint &operator+=(const mint &other){
+        num+=other.num;
+        if(num>=P) num-=P;
+        return *this;
+    }
+    mint &operator-=(const mint &other){
+        num-=other.num;
+        if(num<0) num+=P;
+        return *this;
+    }
+    mint &operator*=(const mint &other){
+        num=(num*other.num)%P;
+        return *this;
+    }
+    mint beki(const ll &x)const{
+        mint res=1;
+        mint now=num;
+        rep(i,0,60){
+            if(x&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
+        }
+        return res;
+    }
+    mint inv()const{
+        mint res=1;
+        mint now=num;
+        rep(i,0,30){
+            if((P-2)&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
+        }
+        return res;
+    }
+    mint operator/(const mint &other)const{
+        return *this*other.inv();
+    }
+    mint &operator/=(const mint &other){
+        num=(num*other.inv())%P;
+        return *this;
+    }
+    operator ll()const{
+        return (ll)(num);
+    }
+    friend ostream& operator<<(ostream& os, const mint& m) {
+        os << m.num;
+        return os;
+    }
+    friend istream& operator>>(istream& is, mint& m) {
+        ll x;
+        is>>x;
+        m=mint(x);
+        return is;
+    }
+};
+ll mint::P=p;
 
 struct combineT {
     // combineT:nodeをcombineする
-    inline ll operator()(ll s, ll t, pll rng) const { return min(s,t); }
+    inline mint operator()(mint l,mint r, pll rng) const {return (l+r); }
 };
 
 struct op {
     // op:nodeにlazyを作用させる
-    inline ll operator()(ll l, ll s, pll rng) const {
-        return l+s;
+    inline mint operator()(mint node,mint lazy, pll rng) const {
+        if(!lazy.c)return 0;
+        return lazy*(mint)(rng.se-rng.fi);
     }
 };
 
 struct combineE {
     // combineE:lazyをcombineする
-    inline ll operator()(ll l1, ll l2, pll rng) const {
-        return l1+l2;
+    inline mint operator()(mint New,mint Old, pll rng) const {
+        return New;
     }
 };
 
@@ -75,7 +154,7 @@ struct lsg {
     {
         int sz=a.size();
         N=1;
-        while(N<sz)N*=2;
+        while(N<=sz)N*=2;
         node.assign(2*N-1,idT);
         lazy.assign(2*N-1,idE);
         range.assign(2*N-1,{0,N});
@@ -138,37 +217,20 @@ struct lsg {
 };
 
 int main(){
-    cin>>N>>Q;
-    cin>>S;
-    vel w(N+1);
+    cin>>N>>M;
+    vem a(N);
+    rep(i,0,N)cin>>a.at(i);
+    mint idT=0;
+    mint idE=0;
+    idE.c=false;
+    lsg<mint,mint, combineT, op, combineE> st(a, combineT(),combineE(),op(),idT,idE);
+    rep(i,0,M){
+        cin>>l>>r;
+        mint res=st.Ique(l-1,r);
+        //cout<<res/(mint)(r-l+1)<<endl;
+        st.Ichan(l-1,r,res/(mint)(r-l+1));
+    }
     rep(i,0,N){
-        w.at(i+1)=2*(S.at(i)=='(')-1;
+        cout<<st.Ique(i,i+1)<<" ";
     }
-    rep(i,0,N)w.at(i+1)+=w.at(i);
-
-    ll idT=inf;
-    ll idE=0;
-    lsg<ll, ll, combineT, op, combineE> st(w, combineT(),combineE(),op(),idT,idE);
-    vel ans;
-    rep(q,0,Q){
-        ll l,r;
-        cin>>x>>l>>r;
-        if(x==1){
-            if(S.at(l-1)==S.at(r-1))continue;
-            if(S.at(l-1)=='('){
-                st.Ichan(l,N,-2);
-                st.Ichan(r,N,2);
-                S.at(l-1)=')';
-                S.at(r-1)='(';
-            }else{
-                S.at(l-1)='(';
-                S.at(r-1)=')';
-                st.Ichan(l,N,2);
-                st.Ichan(r,N,-2);
-            }
-        }else{
-            ans.push_back(st.Ique(l-1,l)==st.Ique(r,r+1)&&st.Ique(l-1,l)<=st.Ique(l-1,r+1));
-        }
-    }
-    rep(i,0,ans.size())cout<<(ans.at(i)==1?"Yes":"No")<<endl;
 }
