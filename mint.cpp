@@ -93,7 +93,7 @@ struct mint{
     mint inv()const{
         mint res=1;
         mint now=num;
-        rep(i,0,60){
+        rep(i,0,30){
             if((P-2)&(1ll<<i)){
                 res*=now;
             } 
