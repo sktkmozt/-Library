@@ -27,7 +27,8 @@ unsigned long long q;
 string S;
 long double k;
 vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
-ll inf=998244353;
+ll p=998244353;
+ll inf=1000000000000000000;//1e18
 // inf=1e9+7;
 // LLONG_MAX
 
@@ -42,14 +43,18 @@ g++ a.cpp -std=c++20
 
 struct mint{
     ll num;
+    static ll P;
     mint(ll x=0){
         if(x<0){
             x*=-1;
-            x%=inf;
-            x=inf-x;
+            x%=P;
+            x=P-x;
         }
-        x%=inf;
+        x%=P;
         num=x;
+    }
+    static void set_mod(ll PP) {
+        P=PP;
     }
     mint operator+(const mint &other)const{
         return mint(num+other.num);
@@ -62,23 +67,23 @@ struct mint{
     }
     mint &operator+=(const mint &other){
         num+=other.num;
-        if(num>=inf) num-=inf;
+        if(num>=P) num-=P;
         return *this;
     }
     mint &operator-=(const mint &other){
         num-=other.num;
-        if(num<0) num+=inf;
+        if(num<0) num+=P;
         return *this;
     }
     mint &operator*=(const mint &other){
-        num=(num*other.num)%inf;
+        num=(num*other.num)%P;
         return *this;
     }
-    mint beki(const mint &x)const{
+    mint beki(const ll &x)const{
         mint res=1;
         mint now=num;
         rep(i,0,60){
-            if(x.num&(1ll<<i)){
+            if(x&(1ll<<i)){
                 res*=now;
             } 
             now*=now;
@@ -89,7 +94,7 @@ struct mint{
         mint res=1;
         mint now=num;
         rep(i,0,30){
-            if((inf-2)&(1ll<<i)){
+            if((P-2)&(1ll<<i)){
                 res*=now;
             } 
             now*=now;
@@ -100,7 +105,7 @@ struct mint{
         return *this*other.inv();
     }
     mint &operator/=(const mint &other){
-        num=(num*other.num)%inf;
+        num=(num*other.inv())%P;
         return *this;
     }
     operator ll()const{
@@ -117,6 +122,7 @@ struct mint{
         return is;
     }
 };
+ll mint::P=p;
 
 
 

@@ -36,8 +36,8 @@ ll inf=998244353;
 */
 
 struct Combine {
-    inline int operator()(int a, int b)const{
-        return a + b;
+    inline ll operator()(ll a,ll b){
+        return max(a,b);
     }
 };
 
@@ -55,34 +55,43 @@ struct seg{
         id=ident;
         ll m=1;
         while(m<sz) m*=2;
-        node.resize(2*m-1,id);
+        node.resize(2*m,id);
         rep(i,0,sz){
-            node[i+m-1]=a[i];
+            node[i+m]=a[i];
         }
-        for(ll i=m-2;i>=0;i--){
-            node[i]=combine(node[2*i+1],node[2*i+2]);
+        rrep(i,m,1){
+            node[i]=combine(node[2*i],node[2*i+1]);
         }
         N=m;
     }
     inline void chan(int i,T x){//i番目をxに変える
-        i+=N-1;
+        i+=N;
         node[i]=x;
         while(i>0){
-            i--;
             i/=2;
-            node[i]=combine(node[2*i+1],node[2*i+2]);
+            node[i]=combine(node[2*i],node[2*i+1]);
         }
     }
+
+    inline void add(int i,T x){//i番目をxに変える
+        i+=N;
+        node[i]+=x;
+        while(i>0){
+            i/=2;
+            node[i]=combine(node[2*i],node[2*i+1]);
+        }
+    }
+
     inline T  Ique(int l,int r){//[a,b)のmin
         T resl=id,resr=id;
-        l+=N-1;
-        r+=N-1;
+        l+=N;
+        r+=N;
         while(l<r){
-            if(!(l&1)){//左のほうの右側なので
+            if(l&1){//左のほうの右側なので
                 resl=combine(resl,node[l]);
-                l--;
+                l++;
             }
-            if(!(r&1)){//半開区間なのでrが右だといい
+            if(r&1){//半開区間なのでrが右だといい
                 r--;
                 resr=combine(node[r],resr);
             }
@@ -93,45 +102,62 @@ struct seg{
     }
 
     inline int upper(T x){
-        int now=0;
+        int now=1;
         T res=id;
-        if(node.at(now)<x){
+        if(node[now]<=x){
             return sz;
         }
-        while(now<N-1){
-            if(combine(res,node[2*now+1])<=x){
-                res=combine(res,node[2*now+1]);
-                now++;
+        while(now<N){
+            if(combine(res,node[2*now])<=x){
+                res=combine(res,node[2*now]);
                 now*=2;
+                now++;
             }else{
                 now*=2;
-                now++;
             }
         }
-        return now-(N-1);
+        return now-N;
     }
 };
 
+
 int main(){
-    cin>>N;
-    vel p(N);
-    vvel b(N);
-    rep(i,0,N) cin>>p.at(i);
-    vector<ll> dp(N,1);
-
-
+    cin>>N>>Q;
+    vel a(N);
+    rep(i,0,N) cin>>a.at(i);
     ///セグ木初期化パート
-    ll id=0;
-    seg<ll,Combine> st(dp,Combine(),id);
-
-
-    vel ans(N,0);
-    rrep(i,N,0){
-        ll ok=st.upper(p.at(i)-1);
-        ans.at(ok)=i;
-        st.chan(ok,0);
+    ll id=-1e18;
+    seg<ll,Combine> st(a,Combine(),id);
+    vel ans;
+    rep(i,0,Q){
+        cin>>x;
+        if(x==1){
+            cin>>y>>z;
+            st.chan(y-1,z);
+        }else if(x==2){
+            ll l,r;
+            cin>>l>>r;
+            ans.push_back(st.Ique(l-1,r));
+        }else{
+            cin>>x>>y;
+            if(st.Ique(x-1,N)<y){
+                ans.push_back(N+1);
+                continue;
+            }
+            if(st.Ique(x-1,x)>=y){
+                ans.push_back(x);
+                continue;
+            }
+            ll ng=x-1,ok=N;
+            while(ok-ng>1){
+                ll mid=(ng+ok)/2;
+                if(st.Ique(x-1,mid)<y)ng=mid;
+                else ok=mid; 
+            }
+            ans.push_back(ok);
+        }
     }
-    rep(i,0,N) cout<<ans.at(i)+1<<" ";
+    rep(i,0,ans.size()) cout<<ans.at(i)<<endl;
 }
 
 /*

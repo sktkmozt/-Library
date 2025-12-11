@@ -220,6 +220,25 @@ struct cnv{
         }
         return C;
     }
+    /*gcd畳み込みは1に向けて累積和して各点積するだけ
+    rep(i,1,R+1){
+        ll now=2;
+        while(now*i<a.size()){
+            a.at(i)+=b.at(i*now);
+            now++;
+        }
+    }
+    //rep(i,0,a.size())cout<<i<<" "<<a.at(i)<<endl;
+    vel ans(R+1);
+    rep(i,0,R+1)ans.at(i)=a.at(i)*a.at(i);
+    rrep(i,R+1,1){
+        ll now=2;
+        while(now*i<ans.size()){
+            ans.at(i)-=ans.at(i*now);
+            now++;
+        }
+    }
+    */
 };
 
 int main(){
