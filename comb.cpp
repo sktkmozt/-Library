@@ -3,44 +3,53 @@ using namespace std;
 #define rep(i,a,b) for(ll i=a;i<b;i++)
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
 #define ll long long
-#define bl __int128_t
 #define ull unsigned long long
 #define ld long double
 #define fi first
 #define se second
 #define vel vector<long long>
 #define vvel vector<vector<long long>>
-#define vem vector<mint>
-#define vvem vector<vector<mint>>
 #define pll pair<ll,ll>
 #define vepll vector<pll>
-#define vvepll vector<vepll>
+#define ves vector<string>
+#define vem vector<mint>
+#define vvem vector<vem>
+#define mint Mint<998244353>
+#define PI 3.141592653589793
 #define cleout(i) cout << fixed << setprecision(i)
-//                上 右 下 左
-vector<int> dx={ -1, 0, 1, 0};
-vector<int> dy={ 0, 1, 0, -1};
+//               上  右 下 左
+vector<int> dx={ -1, 0, 1, 0 };
+vector<int> dy={ 0, 1, 0, -1 };
 
-ll N,K,M,L,R,T,Q,H,W,i,j,k,l;
-ll x,y,z;
-string S,SS;
-vel mod={998244353,1000000007,1000000009,1000000021,1000000033};//(1<<61)-1も素数
+vector<int> ddx={ 1, 1, 1, 0, -1, -1, -1, 0 };
+vector<int> ddy={ 1, 0, -1, -1, -1, 0, 1, 1 };
+
+ll N, K, M, L, R, T, Q, H, W, i, j, l, r;
+ll x, y, z;
+unsigned long long q;
+string S;
+long double k;
+vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
 ll p=998244353;
-// p=1000000007;
+//ll p=1000000007;
 ll inf=1000000000000000000;//1e18
-// inf=LLONG_MAX
+// inf=1e9+7;
+// LLONG_MAX
 
 /*座圧
-    vel A=a;
-    sort(all(a,0,a.size()));
-    a.erase(unique(all(a,0,a.size())),a.end());
-    rep(i,0,A.size()) A.at(i)=lower_bound(all(a,0,a.size()),A.at(i))-a.begin();
-    swap(A,a);
+    sort(a.begin(),a.end());
+    a.erase(unique(a.begin(),a.end()),a.end());
 */
 
-struct mint{
+/*
+g++ a.cpp -std=c++17
+*/
+
+template<ll P>
+struct Mint{
     ll num;
-    static ll P;
-    mint(ll x=0){
+    static constexpr ll MOD=P;
+    Mint(ll x=0){
         if(x<0){
             x*=-1;
             x%=P;
@@ -49,35 +58,32 @@ struct mint{
         x%=P;
         num=x;
     }
-    static void set_mod(ll PP) {
-        P=PP;
+    Mint operator+(const Mint &other)const{
+        return Mint(num+other.num);
     }
-    mint operator+(const mint &other)const{
-        return mint(num+other.num);
+    Mint operator-(const Mint &other)const{
+        return Mint(num-other.num);
     }
-    mint operator-(const mint &other)const{
-        return mint(num-other.num);
+    Mint operator*(const Mint &other)const{
+        return Mint(num*other.num);
     }
-    mint operator*(const mint &other)const{
-        return mint(num*other.num);
-    }
-    mint &operator+=(const mint &other){
+    Mint &operator+=(const Mint &other){
         num+=other.num;
         if(num>=P) num-=P;
         return *this;
     }
-    mint &operator-=(const mint &other){
+    Mint &operator-=(const Mint &other){
         num-=other.num;
         if(num<0) num+=P;
         return *this;
     }
-    mint &operator*=(const mint &other){
+    Mint &operator*=(const Mint &other){
         num=(num*other.num)%P;
         return *this;
     }
-    mint beki(const ll &x)const{
-        mint res=1;
-        mint now=num;
+    Mint beki(const ll &x)const{
+        Mint res=1;
+        Mint now=num;
         rep(i,0,60){
             if(x&(1ll<<i)){
                 res*=now;
@@ -86,10 +92,10 @@ struct mint{
         }
         return res;
     }
-    mint inv()const{
-        mint res=1;
-        mint now=num;
-        rep(i,0,60){
+    Mint inv()const{
+        Mint res=1;
+        Mint now=num;
+        rep(i,0,30){
             if((P-2)&(1ll<<i)){
                 res*=now;
             } 
@@ -97,28 +103,27 @@ struct mint{
         }
         return res;
     }
-    mint operator/(const mint &other)const{
+    Mint operator/(const Mint &other)const{
         return *this*other.inv();
     }
-    mint &operator/=(const mint &other){
+    Mint &operator/=(const Mint &other){
         num=(num*other.inv())%P;
         return *this;
     }
     operator ll()const{
         return (ll)(num);
     }
-    friend ostream& operator<<(ostream& os, const mint& m) {
+    friend ostream& operator<<(ostream& os, const Mint& m) {
         os << m.num;
         return os;
     }
-    friend istream& operator>>(istream& is, mint& m) {
+    friend istream& operator>>(istream& is, Mint& m) {
         ll x;
         is>>x;
-        m=mint(x);
+        m=Mint(x);
         return is;
     }
 };
-ll mint::P=p;
 
 struct CB{
     vem n,r;

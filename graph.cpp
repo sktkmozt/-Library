@@ -37,6 +37,53 @@ ll inf=1000000000000000000;//1e18
     swap(A,a);
 */
 
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,a,b) for(ll i=a;i<b;i++)
+#define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
+#define ll long long
+#define ull unsigned long long
+#define ld long double
+#define fi first
+#define se second
+#define vel vector<long long>
+#define vvel vector<vector<long long>>
+#define pll pair<ll,ll>
+#define vepll vector<pll>
+#define ves vector<string>
+#define vem vector<mint>
+#define vvem vector<vem>
+#define PI 3.141592653589793
+#define cleout(i) cout << fixed << setprecision(i)
+//               上  右 下 左
+vector<int> dx={ -1, 0, 1, 0 };
+vector<int> dy={ 0, 1, 0, -1 };
+
+vector<int> ddx={ 1, 1, 1, 0, -1, -1, -1, 0 };
+vector<int> ddy={ 1, 0, -1, -1, -1, 0, 1, 1 };
+
+ll N, K, M, L, R, T, Q, H, W, i, j, l, r;
+ll x, y, z;
+unsigned long long q;
+string S;
+long double k;
+vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
+ll p=998244353;
+//ll p=1000000007;
+ll inf=1000000000000000000;//1e18
+// inf=1e9+7;
+// LLONG_MAX
+
+/*座圧
+    sort(a.begin(),a.end());
+    a.erase(unique(a.begin(),a.end()),a.end());
+*/
+
+/*
+g++ a.cpp -std=c++17
+*/
+
+
 struct graph{
     ll size;
     vvel vertex;
@@ -50,14 +97,14 @@ struct graph{
         iter.assign(size,0);
     }
     void add(ll x,ll y,ll to=1){//有向辺
-        vertex.at(x).push_back(edge.size());
+        vertex[x].push_back(edge.size());
         edge.push_back({x,y});
         cost.push_back(to);
     }
     void add_flow(ll x,ll y,ll to=1){//有向辺
-        vertex.at(x).push_back(edge.size());
+        vertex[x].push_back(edge.size());
         edge.push_back({x,y});
-        vertex.at(y).push_back(edge.size());
+        vertex[y].push_back(edge.size());
         edge.push_back({y,x});
         mergin.push_back({to,0});
     }
@@ -65,18 +112,18 @@ struct graph{
         queue<ll> qu;
         qu.push(s);
         vel ret(size,inf);
-        ret.at(s)=0;
+        ret[s]=0;
         while(!qu.empty()){
             ll now=qu.front();
             qu.pop();
-            for(auto y:vertex.at(now)){
-                ll nnow=edge.at(y).se;
+            for(auto y:vertex[now]){
+                ll nnow=edge[y].se;
                 if(is_flow){
-                    if(y%2==0&&mergin.at(y/2).fi==0)continue;
-                    if(y%2==1&&mergin.at(y/2).se==0)continue;
+                    if(y%2==0&&mergin[y/2].fi==0)continue;
+                    if(y%2==1&&mergin[y/2].se==0)continue;
                 }
-                if(ret.at(nnow)>ret.at(now)+1){
-                    ret.at(nnow)=ret.at(now)+1;
+                if(ret[nnow]>ret[now]+1){
+                    ret[nnow]=ret[now]+1;
                     qu.push(nnow);
                 }
             }
@@ -87,15 +134,15 @@ struct graph{
         deque<ll> qu;
         qu.push_back(s);
         vel ret(size,inf);
-        ret.at(s)=0;
+        ret[s]=0;
         while(!qu.empty()){
             ll now=qu.front();
             qu.pop_front();
-            for(auto y:vertex.at(now)){
-                ll nnow=edge.at(y).se;
-                ll cst=cost.at(y);
-                if(ret.at(nnow)>ret.at(now)+cst){
-                    ret.at(nnow)=ret.at(now)+cst;
+            for(auto y:vertex[now]){
+                ll nnow=edge[y].se;
+                ll cst=cost[y];
+                if(ret[nnow]>ret[now]+cst){
+                    ret[nnow]=ret[now]+cst;
                     if(cst==1)qu.push_back(nnow);
                     else qu.push_front(nnow);
                 }
@@ -107,17 +154,17 @@ struct graph{
         priority_queue<pll, vector<pll>, greater<pll>> pq;
         pq.push({0,s});
         vel ret(size,inf);
-        ret.at(s)=0;
+        ret[s]=0;
         while(!pq.empty()){
             pll now=pq.top();
             pq.pop();
-            if(ret.at(now.se)!=now.fi)continue;
-            for(auto y:vertex.at(now.se)){
-                ll nnow=edge.at(y).se;
-                ll cst=cost.at(y);
-                if(ret.at(nnow)>ret.at(now.se)+cst){
-                    ret.at(nnow)=ret.at(now.se)+cst;
-                    pq.push({ret.at(nnow),nnow});
+            if(ret[now.se]!=now.fi)continue;
+            for(auto y:vertex[now.se]){
+                ll nnow=edge[y].se;
+                ll cst=cost[y];
+                if(ret[nnow]>ret[now.se]+cst){
+                    ret[nnow]=ret[now.se]+cst;
+                    pq.push({ret[nnow],nnow});
                 }
             }
         }
@@ -129,21 +176,21 @@ struct graph{
             return f;
         }
         ll cnt=0;
-        for(ll &i=iter.at(now);i<vertex.at(now).size();i++){
-            ll y=vertex.at(now).at(i);
-            ll nnow=edge.at(y).se;
-            if(dist.at(nnow)>dist.at(now)){
-                ll mgn=(y%2==0?mergin.at(y/2).fi:mergin.at(y/2).se);
+        for(ll &i=iter[now];i<vertex[now].size();i++){
+            ll y=vertex[now][i];
+            ll nnow=edge[y].se;
+            if(dist[nnow]>dist[now]){
+                ll mgn=(y%2==0?mergin[y/2].fi:mergin[y/2].se);
                 if(mgn==0)continue;
                 ll f_mgn=min(f,mgn);
                 ll flow=dfs_flow(dist,nnow,g,f_mgn);
                 f-=flow;
                 if(y%2==0){
-                    mergin.at(y/2).fi-=flow;
-                    mergin.at(y/2).se+=flow;
+                    mergin[y/2].fi-=flow;
+                    mergin[y/2].se+=flow;
                 }else{
-                    mergin.at(y/2).fi+=flow;
-                    mergin.at(y/2).se-=flow;
+                    mergin[y/2].fi+=flow;
+                    mergin[y/2].se-=flow;
                 }
                 cnt+=flow;
                 if(f==0)break;
@@ -155,7 +202,7 @@ struct graph{
         ll flow=0;
         while(1){
             vel dist=bfs(s,true);
-            if(dist.at(g)==inf)break;
+            if(dist[g]==inf)break;
             iter.assign(size,0);
             while(1){
                 ll f=dfs_flow(dist,s,g,inf);
@@ -166,6 +213,41 @@ struct graph{
         return flow;
     }
 };
+
+int main(){
+    cin>>H>>W;
+    vvel a(H,vel(W));
+    rep(i,0,H){
+        cin>>S;
+        rep(j,0,W){
+            if(S[j]=='#')a[i][j]=inf;
+            else{
+                if(S[j]!='.')a[i][j]=S[j]-'a'+1;
+            }
+        }
+    }
+    graph G(H*W+26);
+    rep(i,0,H){
+        rep(j,0,W){
+            if(a[i][j]==inf)continue;
+            rep(k,0,4){
+                pll now={i+dx[k],j+dy[k]};
+                if(0<=now.fi&&now.fi<H&&0<=now.se&&now.se<W){
+                    if(a[now.fi][now.se]!=inf){
+                        G.add(now.fi*W+now.se,i*W+j,1);
+                        G.add(i*W+j,now.fi*W+now.se,1);
+                    }
+                }
+            }
+            if(a[i][j]){
+                G.add(i*W+j,H*W-1+a[i][j],0);
+                G.add(H*W-1+a[i][j],i*W+j,1);
+            }
+        }
+    }
+    vel v=G.bfs01(0);
+    cout<<(v[H*W-1]==inf?-1:v[H*W-1]);
+}
 
 bool c(pll now){
     return 0<=now.fi&&now.fi<N&&0<=now.se&&now.se<N;

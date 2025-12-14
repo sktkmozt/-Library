@@ -12,6 +12,7 @@ using namespace std;
 #define pll pair<ll,ll>
 #define vepll vector<pll>
 #define ves vector<string>
+#define mint Mint<998244353>
 #define PI 3.141592653589793
 #define cleout(i) cout << fixed << setprecision(i)
 //               上  右 下 左
@@ -41,10 +42,11 @@ ll inf=1000000000000000000;//1e18
 g++ a.cpp -std=c++20
 */
 
-struct mint{
+template<ll P>
+struct Mint{
     ll num;
-    static ll P;
-    mint(ll x=0){
+    static constexpr ll MOD=P;
+    Mint(ll x=0){
         if(x<0){
             x*=-1;
             x%=P;
@@ -53,35 +55,32 @@ struct mint{
         x%=P;
         num=x;
     }
-    static void set_mod(ll PP) {
-        P=PP;
+    Mint operator+(const Mint &other)const{
+        return Mint(num+other.num);
     }
-    mint operator+(const mint &other)const{
-        return mint(num+other.num);
+    Mint operator-(const Mint &other)const{
+        return Mint(num-other.num);
     }
-    mint operator-(const mint &other)const{
-        return mint(num-other.num);
+    Mint operator*(const Mint &other)const{
+        return Mint(num*other.num);
     }
-    mint operator*(const mint &other)const{
-        return mint(num*other.num);
-    }
-    mint &operator+=(const mint &other){
+    Mint &operator+=(const Mint &other){
         num+=other.num;
         if(num>=P) num-=P;
         return *this;
     }
-    mint &operator-=(const mint &other){
+    Mint &operator-=(const Mint &other){
         num-=other.num;
         if(num<0) num+=P;
         return *this;
     }
-    mint &operator*=(const mint &other){
+    Mint &operator*=(const Mint &other){
         num=(num*other.num)%P;
         return *this;
     }
-    mint beki(const ll &x)const{
-        mint res=1;
-        mint now=num;
+    Mint beki(const ll &x)const{
+        Mint res=1;
+        Mint now=num;
         rep(i,0,60){
             if(x&(1ll<<i)){
                 res*=now;
@@ -90,9 +89,9 @@ struct mint{
         }
         return res;
     }
-    mint inv()const{
-        mint res=1;
-        mint now=num;
+    Mint inv()const{
+        Mint res=1;
+        Mint now=num;
         rep(i,0,30){
             if((P-2)&(1ll<<i)){
                 res*=now;
@@ -101,28 +100,27 @@ struct mint{
         }
         return res;
     }
-    mint operator/(const mint &other)const{
+    Mint operator/(const Mint &other)const{
         return *this*other.inv();
     }
-    mint &operator/=(const mint &other){
+    Mint &operator/=(const Mint &other){
         num=(num*other.inv())%P;
         return *this;
     }
     operator ll()const{
         return (ll)(num);
     }
-    friend ostream& operator<<(ostream& os, const mint& m) {
+    friend ostream& operator<<(ostream& os, const Mint& m) {
         os << m.num;
         return os;
     }
-    friend istream& operator>>(istream& is, mint& m) {
+    friend istream& operator>>(istream& is, Mint& m) {
         ll x;
         is>>x;
-        m=mint(x);
+        m=Mint(x);
         return is;
     }
 };
-ll mint::P=p;
 
 
 
