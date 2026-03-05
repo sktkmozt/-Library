@@ -220,7 +220,6 @@ void _solve(){
     rep(i,0,Q)cout<<res[i]<<"\n";
 }
 
-
 int main(){
     cin.tie(nullptr);
  	ios_base::sync_with_stdio(false);
