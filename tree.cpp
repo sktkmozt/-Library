@@ -45,8 +45,6 @@ ll inf=(1ll<<61);
 
 //[x^M]1/(1-x)^N=comb(N-1+M,M)
 
-
-
 template<typename T, typename Combine>
 struct seg{
     int N;
@@ -137,7 +135,7 @@ struct seg{
     }
 };
 
-struct LCA{
+struct Tree{
     vvel G;
     vel ord;
     vel in;
@@ -147,6 +145,8 @@ struct LCA{
     vvel binary_P;
     vvepll sp;//[j,j+2^i)のmin
     ll N;
+    ll root;
+    ll log;
 
     void e_dfs(ll now,ll par){//オイラーツアー
         P[now]=par;
@@ -161,22 +161,15 @@ struct LCA{
         out[now]=ord.size();
     }
 
-    LCA(vvel &Graph,ll root=0){
-        G=Graph;
-        N=G.size();
-        in.assign(N,-1);
-        out.assign(N,-1);
-        deep.assign(N,0);
-        P.assign(N,-1);
+    void _build(){
+        ord.clear();
         e_dfs(root,root);
-        ll size=0;
-        while((1ll<<(size+1))<=ord.size())size++;
-        size++;
-        sp.assign(size,vepll(ord.size(),{inf,-1}));
+        log = bit_width((ull)ord.size());
+        sp.assign(log,vepll(ord.size(),{inf,-1}));
         rep(i,0,ord.size()){
             sp[0][i]={deep[ord[i]],ord[i]};
         }
-        rep(i,1,size){
+        rep(i,1,log){
             rep(j,0,ord.size()){
                 pll r={inf,-1};
                 if(j+(1ll<<(i-1))<ord.size()){
@@ -185,6 +178,26 @@ struct LCA{
                 sp[i][j]=min(sp[i-1][j],r);
             }
         }
+    }
+
+    Tree(vvel &Graph,ll rt=0):root(rt){
+        G=Graph;
+        N=G.size();
+        in.assign(N,-1);
+        out.assign(N,-1);
+        deep.assign(N,0);
+        P.assign(N,-1);
+        _build();
+    }
+
+    void update(ll rt){
+        root=rt;
+        in.assign(N,-1);
+        out.assign(N,-1);
+        deep.assign(N,0);
+        P.assign(N,-1);
+        
+        _build();
     }
 
     ll lca(ll l,ll r){
@@ -204,16 +217,16 @@ struct LCA{
     }
 
     void build_binary(){
-        ll size=25;
-        binary_P.assign(size,vel(N));
+        binary_P.assign(log,vel(N));
         binary_P[0]=P;
-        rep(i,1,size){
+        rep(i,1,log){
             rep(j,0,N)binary_P[i][j]=binary_P[i-1][binary_P[i-1][j]];
         }
     }
 
-    ll up(ll now,ll K){//build_binaryを使わないとダメ
-        rep(i,0,25){
+    ll up(ll now,ll K){//build_binaryを使わないとダメ&updateしたらbuild_binryしなおす必要ある
+        if((1ll<<log)<=K)return root;
+        rep(i,0,log){
             if((1ll<<i)&K){
                 now=binary_P[i][now];
             }
@@ -224,6 +237,22 @@ struct LCA{
 
     bool subtree(ll u,ll root){
         return in[root]<=in[u]&&out[u]<=out[root];
+    }
+
+    pll diag(){
+        pll ret={root,root};
+        ll d=0;
+        for(auto node:ord){
+            if(dist(ret.fi,node)>d){
+                d=dist(ret.fi,node);
+                ret={ret.fi,node};
+            }
+            if(dist(ret.se,node)>d){
+                d=dist(ret.se,node);
+                ret={node,ret.se};
+            }
+        }
+        return ret;
     }
 
     void solve(ll Q){
@@ -301,7 +330,6 @@ struct LCA{
     }
 };
 
-
 void _solve(){
     cin>>N>>Q;
     vvel G(N);
@@ -312,19 +340,18 @@ void _solve(){
         G[x].push_back(y);
         G[y].push_back(x);
     }
-    LCA lca(G);
-    lca.solve(Q);
+    Tree tree(G);
+    tree.solve(Q);
 }
+
 
 int main(){
     cin.tie(nullptr);
  	ios_base::sync_with_stdio(false);
 
-
+    
     ll _;
     bool multitest=0;
-
-
     if(multitest)cin>>_;
     else _=1;
     rep(__,0,_){
