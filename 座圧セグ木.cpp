@@ -51,7 +51,7 @@ struct info{
 };
 
 struct Combine {
-    inline info operator()(info a,info b){
+    inline info operator()(const info &a,const info &b){
         info res;
         if(a.min_val==a.sum+b.min_val){
             res=a;
@@ -108,6 +108,9 @@ struct compseg{
 
     inline void chan(ll i,T x){
         ll _i=lower_bound(dic.begin(),dic.end(),i)-dic.begin();
+        if(dic[_i]!=i){
+            cerr<<"index_error : chan"<<endl;
+        }
         _chan(_i,x);
     }
 
@@ -132,12 +135,21 @@ struct compseg{
 
     inline T  Ique(ll l,ll r){
         ll _l=lower_bound(dic.begin(),dic.end(),l)-dic.begin();
+        if(dic[_l]!=l){
+            cerr<<"index_error : Ique"<<endl;
+        }
         ll _r=lower_bound(dic.begin(),dic.end(),r)-dic.begin();
+        if(dic[_r]!=r){
+            cerr<<"index_error : Ique"<<endl;
+        }
         return _Ique(_l,_r);
     }
 
     inline T get(ll i){
         ll _i=lower_bound(dic.begin(),dic.end(),i)-dic.begin();
+        if(dic[_i]!=i){
+            cerr<<"index_error : get"<<endl;
+        }
         return node[_i+N];
     }
 
@@ -145,7 +157,7 @@ struct compseg{
         return node[1];
     }
 
-    inline int _upper(int l,ll x){//check(node[now],x)=1の最小のindex(l以上で)
+    inline ll _upper(int l,ll x){//check(node[now],x)=1の最小のindex(l以上で)
         if(l>=sz)return sz;
         l+=N;
         T now=id;
@@ -167,13 +179,15 @@ struct compseg{
         return inf;
     }
 
-    inline int upper(ll l,ll x){
+    inline ll upper(ll l,ll x){
         ll _l=lower_bound(dic.begin(),dic.end(),l)-dic.begin();
-        return _upper(_l,x);
+        ll ret=_upper(_l,x);
+        if(ret==inf)return ret;
+        return dic[ret];
     }
 
 
-    inline int _lower(int r,ll x){//check(node[now],x)=1の最大のindex(r未満で)
+    inline ll _lower(int r,ll x){//check(node[now],x)=1の最大のindex(r未満で)
         if(r<=0)return -1;
         r+=N;
         T now=id;
@@ -195,9 +209,11 @@ struct compseg{
         return -inf;
     }
 
-    inline int lower(ll r,ll x){
+    inline ll lower(ll r,ll x){
         ll _r=lower_bound(dic.begin(),dic.end(),r)-dic.begin();
-        return _lower(_r,x);
+        ll ret=_lower(_r,x);
+        if(ret==-inf)return ret;
+        return dic[ret];
     }
 
     bool check(T node,ll x){
@@ -240,13 +256,13 @@ void _solve(){
             info x=st.get(id);
             x.min_val+=b;x.sum+=b;
             st.chan(id,x);
+
             id=min(r[i],H-h+1);
             x=st.get(id);
             x.min_val-=b;x.sum-=b;
             st.chan(id,x);
         }
         info res=st.all();
-        cout<<it->fi<<" "<<res.min_val<<" "<<res.min_cnt<<" "<<res.sum<<endl;
         ans+=(it->fi-last)*len;
         if(res.min_val==0)len=res.min_cnt;
         else len=0;
