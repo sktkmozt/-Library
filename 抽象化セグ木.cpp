@@ -7,8 +7,9 @@ using namespace std;
 #define ld long double
 #define fi first
 #define se second
-#define vel vector<long long>
-#define vvel vector<vector<long long>>
+#define bl __int128_t
+#define vel vector<ll>
+#define vvel vector<vector<ll>>
 #define vvvel vector<vvel>
 #define vvepll vector<vepll>
 #define pll pair<ll,ll>
@@ -16,8 +17,8 @@ using namespace std;
 #define ves vector<string>
 #define vem vector<mint>
 #define vvem vector<vem>
-#define mint Mint<998244353>
-//#define mint Mint<1000000007>
+#define pmm pair<mint,mint>
+#define vepmm vector<pmm>
 #define cleout(i) cout<<fixed<<setprecision(i)
 template<class T>using PQ=priority_queue<T,vector<T>,greater<T>>;
 //               上  右 下 左
@@ -34,17 +35,18 @@ unsigned long long q;
 string S;
 long double k;
 vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
-ll inf=1000000000000000000;//1e18
+//ll inf=1000000000000000000;//1e18
+ll inf=(1ll<<61);
 // inf=1e9+7;
-// LLONG_MAX
+//ll inf=LLONG_MAX;
 
 //mt19937_64 rng((ull) chrono::steady_clock::now().time_since_epoch().count());
 
 //[x^M]1/(1-x)^N=comb(N-1+M,M)
 
 struct Combine {
-    inline pll operator()(pll a,pll b){
-        return {max(a.fi,b.fi+a.se),b.se+a.se};
+    inline ll operator()(ll a,ll b){
+        return min(a,b);
     }
 };
 
@@ -118,7 +120,8 @@ struct seg{
         return node[1];
     }
 
-    inline int upper(int l,ll x){//check(node[now],x)=1の最小のindex
+    template<typename F>
+    int upper(int l,T x,F check){//check(node[now],x)=1の最小のindex
         if(l>=sz)return sz;
         l+=N;
         T now=id;
@@ -141,7 +144,8 @@ struct seg{
     }
 
 
-    inline int lower(int r,ll x){//check(node[now],x)=1の最大のindex
+    template<typename F>
+    inline int lower(int r,T x,F check){//check(node[now],x)=1の最大のindex
         if(r<=0)return -1;
         r+=N;
         T now=id;
@@ -162,31 +166,35 @@ struct seg{
         }while((r&-r)!=r);//2冪なら場外(r+1が右端になってるので)
         return -1;
     }
-
-    bool check(T node,ll x){
-        return node.fi>x;
-    }
 };
 
 void _solve(){
-    cin>>N>>K;
-    vel a(N),b(N);
+    cin>>N>>Q;
+    vel a(N);
     rep(i,0,N)cin>>a[i];
-    rep(i,0,N)cin>>b[i];
-    vepll dp(2*N);
+    vel dp(N+1);
     rep(i,0,N){
-        dp[i].fi=b[i]-a[i];
-        dp[i].se=dp[i].fi;
-        dp[i+N]=dp[i];
+        if(a[i]<=N)dp[a[i]]++;
     }
-    pll id={-inf,0};
-    seg<pll,Combine> st(dp,Combine(),id);
-    ll ans=0;
-    rep(i,0,N){
-        ll r=st.upper(i,-1);
-        ans=max(ans,r-i+1);
+    seg<ll,Combine> st(dp,Combine(),inf);
+    rep(q,0,Q){
+        cin>>x>>y;
+        x--;
+        ll now;
+        if(a[x]<=N){
+            now=st.Ique(a[x],a[x]+1);
+            st.chan(a[x],now-1);
+        }
+        a[x]=y;
+        if(a[x]<=N){
+            now=st.Ique(a[x],a[x]+1);
+            st.chan(a[x],now+1);
+        }
+        auto check=[&](ll val,ll x){
+            return val<=x;
+        };
+        cout<<st.upper(0,0,check)<<"\n";
     }
-    cout<<ans<<"\n";
 }
 
 
@@ -197,7 +205,9 @@ int main(){
 
 
     ll _;
-    bool multitest=1;
+    bool multitest=0;
+
+
     if(multitest)cin>>_;
     else _=1;
     rep(__,0,_){
