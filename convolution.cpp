@@ -1,8 +1,8 @@
+//abc436-g
 #include <bits/stdc++.h>
 using namespace std;
 #define rep(i,a,b) for(ll i=a;i<b;i++)
 #define rrep(i,a,b) for(ll i=a-1;i>=b;i--)
-#define all(a,i,j) a.begin()+i,a.begin()+j
 #define ll long long
 #define ull unsigned long long
 #define ld long double
@@ -12,106 +12,162 @@ using namespace std;
 #define vvel vector<vector<long long>>
 #define pll pair<ll,ll>
 #define vepll vector<pll>
+#define ves vector<string>
+#define vem vector<mint>
+#define vvem vector<vem>
+#define mint Mint<998244353>
+#define PI 3.141592653589793
 #define cleout(i) cout << fixed << setprecision(i)
-//                上 右 下 左
-vector<int> dx={ -1, 0, 1, 0};
-vector<int> dy={ 0, 1, 0, -1};
+//               上  右 下 左
+vector<int> dx={ -1, 0, 1, 0 };
+vector<int> dy={ 0, 1, 0, -1 };
 
-ll N, K, M, L, R, Q, H, W, i, j, k, l;
+vector<int> ddx={ 1, 1, 1, 0, -1, -1, -1, 0 };
+vector<int> ddy={ 1, 0, -1, -1, -1, 0, 1, 1 };
+
+ll N, K, M, L, R, T, Q, H, W, i, j, l, r;
 ll x, y, z;
-string S,T;
-vel mod={998244353,897581057,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21};//(1<<61)-1も素数
-ll inf=998244353;
+unsigned long long q;
+string S;
+long double k;
+vel mod={998244353,(ll)1e9+7,(ll)1e9+9,(ll)1e9+21,(ll)1e9+33};
+ll p=998244353;
+//ll p=1000000007;
+ll inf=1000000000000000000;//1e18
 // inf=1e9+7;
 // LLONG_MAX
 
 /*座圧
-    vel A=a;
-    sort(all(a,0,a.size()));
-    a.erase(unique(all(a,0,a.size())),a.end());
-    rep(i,0,A.size()) A.at(i)=lower_bound(all(a,0,a.size()),A.at(i))-a.begin();
-    swap(A,a);
+    sort(a.begin(),a.end());
+    a.erase(unique(a.begin(),a.end()),a.end());
 */
 
-ll beki(ll a,ll b,ll inf){
-    ll ans=1;
-    ll now=a%inf;
-    rep(i,0,60){
-        if(b&(1ll<<i)){
-            ans*=now;
-            ans%=inf;
-        }
-        now*=now;
-        now%=inf;
-    }
-    return ans;
-}
+/*
+g++ a.cpp -std=c++17
+*/
 
-struct cnv{
-    vel A,B,C,D;
-    ll now,cnt,ind;
-
-    vel euclid(ll x,ll y){
-        tuple<ll,ll,ll> a={x,1,0},b={y,0,1};
+template<ll P>
+struct Mint{
+    ll num;
+    static constexpr ll MOD=P;
+    Mint(ll x=0){
         if(x<0){
-            a={-x,-1,0};
+            x*=-1;
+            x%=P;
+            x=P-x;
         }
-        if(y<0){
-            b={-y,0,-1};
+        x%=P;
+        num=x;
+    }
+    Mint operator+(const Mint &other)const{
+        return Mint(num+other.num);
+    }
+    Mint operator-(const Mint &other)const{
+        return Mint(num-other.num);
+    }
+    Mint operator*(const Mint &other)const{
+        return Mint(num*other.num);
+    }
+    Mint &operator+=(const Mint &other){
+        num+=other.num;
+        if(num>=P) num-=P;
+        return *this;
+    }
+    Mint &operator-=(const Mint &other){
+        num-=other.num;
+        if(num<0) num+=P;
+        return *this;
+    }
+    Mint &operator*=(const Mint &other){
+        num=(num*other.num)%P;
+        return *this;
+    }
+    Mint beki(const ll &x)const{
+        Mint res=1;
+        Mint now=num;
+        rep(i,0,60){
+            if(x&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
         }
-        if(get<0>(a)<get<0>(b)) swap(a,b);
-        while(get<0>(b)!=0){
-            ll cnt=get<0>(a)/get<0>(b);
-            a={get<0>(a)-cnt*get<0>(b),get<1>(a)-cnt*get<1>(b),get<2>(a)-cnt*get<2>(b)};
-            swap(a,b);
-        }////////gcd(x,y)  xの係数   yの係数
-        vel res={get<0>(a),get<1>(a),get<2>(a)};
         return res;
     }
-
-    ll euclidsolver(pll a,pll b){//a=(a_1,p_a) b=(b_1,p_b)でmod p_a*p_bでのやつ返す
-        vel res=euclid(a.se,b.se);
-        __int128_t inf=a.se*b.se;
-        __int128_t ans=(res.at(2)+inf)%inf;
-        ans*=b.se;ans%=inf;ans*=a.fi;ans%=inf;
-        __int128_t ANS=(res.at(1)+inf)%inf;
-        ANS*=a.se;ANS%=inf;ANS*=b.fi;ANS%=inf;
-        ans+=ANS;
-        ans%=inf;
-        return ans;
+    Mint inv()const{
+        Mint res=1;
+        Mint now=num;
+        rep(i,0,30){
+            if((P-2)&(1ll<<i)){
+                res*=now;
+            } 
+            now*=now;
+        }
+        return res;
     }
+    Mint operator/(const Mint &other)const{
+        return *this*other.inv();
+    }
+    Mint &operator/=(const Mint &other){
+        num=(num*other.inv())%P;
+        return *this;
+    }
+    operator ll()const{
+        return (ll)(num);
+    }
+    friend ostream& operator<<(ostream& os, const Mint& m) {
+        os << m.num;
+        return os;
+    }
+    friend istream& operator>>(istream& is, Mint& m) {
+        ll x;
+        is>>x;
+        m=Mint(x);
+        return is;
+    }
+};
 
-    void set(vel &a,vel &b){
+
+
+
+
+template<typename T>
+struct cnv{
+    vector<T> A,B,C,D;
+    ll now,cnt,ind;
+    ll n,m;
+
+
+    cnv(vector<T> &a,vector<T> &b){
         now=1;
         cnt=0;
         while(now<a.size()+b.size()){
             cnt++;
             now*=2;
         }
+        n=a.size();m=b.size();
         A.assign(now,0);
         B.assign(now,0);
-        rep(i,0,a.size()) A.at(i)=a.at(i);
-        rep(i,0,b.size()) B.at(i)=b.at(i);
+        rep(i,0,a.size()) A[i]=a[i];
+        rep(i,0,b.size()) B[i]=b[i];
         ind=max(a.size(),b.size());
     }
 
-    vel DFT(vel &a,ll inf,ll iv,ll cnt){
+    vector<T> DFT(vector<T> &a,T iv,ll cnt){
         ll size=a.size()/2;
-        vel INV(a.size(),1);
-        INV.at(1)=iv;
+        vector<T> INV(a.size(),1);
+        INV[1]=iv;
         rep(i,2,a.size()){
-            INV.at(i)=(INV.at(i-1)*iv)%inf;
+            INV[i]=INV[i-1]*iv;
         }
-        vel ra=a;
+        vector<T> ra=a;
         ll SIZE=1;
         while(size!=0){
             rep(i,0,SIZE){
-                ll IV=1;
+                T IV=1;
                 ll I=i*2*size;
                 rep(j,0,size){
-                    ra.at(I+j)=ra.at(I+j)+ra.at(I+size+j);
-                    if(ra.at(I+j)>=inf) ra.at(I+j)-=inf;
-                    ra.at(I+size+j)=((2*inf+ra.at(I+j)-2*ra.at(I+size+j))*INV.at(cnt*j))%inf;
+                    ra[I+j]=ra[I+j]+ra[I+size+j];
+                    ra[I+size+j]=(ra[I+j]-(T)2*ra[I+size+j])*INV[cnt*j];
                 }
             }
             cnt*=2;
@@ -121,12 +177,12 @@ struct cnv{
         return ra;
     }
 
-    vel rev(vel &a,ll cnt){
-        vel res(a.size(),0);
+    vector<T> rev(vector<T> &a,ll cnt){
+        vector<T> res(a.size(),0);
         rep(i,0,a.size()){
             ll j=i;
             if(i==0){
-                res.at(i)=a.at(i);
+                res[i]=a[i];
             }else{
                 ll r=0;
                 if(cnt%2==1) r|=((i>>(cnt/2))&1)<<(cnt/2);
@@ -140,122 +196,76 @@ struct cnv{
         return res;
     }
 
-    vel SUM(bool c){
-        ll iv0=beki(3,(mod.at(0)-1)/now,mod.at(0));
-        ll iv1=beki(3,(mod.at(1)-1)/now,mod.at(1));
-        vel fa0=DFT(A,mod.at(0),iv0,1);
-        vel fb0=DFT(B,mod.at(0),iv0,1);
-        vel fc0(fa0.size());
-        rep(i,0,fc0.size()) fc0.at(i)=(fa0.at(i)*fb0.at(i))%mod.at(0);
-        iv0=beki(iv0,mod.at(0)-2,mod.at(0));
-        iv1=beki(iv1,mod.at(1)-2,mod.at(1));
+    vector<T> conv(){
+        T iv0=3;
+        iv0=iv0.beki((iv0.MOD-1)/now);
+        vector<T> fa0=DFT(A,iv0,1);
+        vector<T> fb0=DFT(B,iv0,1);
+        vector<T> fc0(fa0.size());
+        rep(i,0,fc0.size()) fc0[i]=fa0[i]*fb0[i];
+        iv0=(T)1/iv0;
         fc0=rev(fc0,cnt);
-        C=DFT(fc0,mod.at(0),iv0,1);
+        C=DFT(fc0,iv0,1);
         C=rev(C,cnt);
-        ll iv=beki(now,mod.at(0)-2,mod.at(0));
-        rep(i,0,C.size())C.at(i)=(C.at(i)*iv)%mod.at(0);
-        if(c){
-            ll iv1=beki(3,(mod.at(1)-1)/now,mod.at(1));
-            vel fa1=DFT(A,mod.at(1),iv1,1);
-            vel fb1=DFT(B,mod.at(1),iv1,1);
-            vel fc1(fa1.size());
-            rep(i,0,fc1.size()) fc1.at(i)=(fa1.at(i)*fb1.at(i))%mod.at(1);
-            iv1=beki(iv1,mod.at(1)-2,mod.at(1));
-            fc1=rev(fc1,cnt);
-            D=DFT(fc1,mod.at(1),iv1,1);
-            D=rev(D,cnt);
-            iv=beki(now,mod.at(1)-2,mod.at(1));
-            rep(i,0,D.size())D.at(i)=(D.at(i)*iv)%mod.at(1);
-            C.at(i)=euclidsolver({C.at(i),mod.at(0)},{D.at(i),mod.at(1)});
-            return C;
-        }
-        return C;
+        T iv=T(1)/T(now);
+        rep(i,0,C.size())C[i]=C[i]*iv;
+        vector<T> res(n+m-1);
+        rep(i,0,n+m-1)res[i]=C[i];
+        return res;
     }
-
-    vel MAX(){
-        rep(i,0,now-1){
-            A.at(i+1)+=A.at(i);
-            A.at(i+1)%=mod.at(0);
-        }
-        rep(i,0,now-1){
-            B.at(i+1)+=B.at(i);
-            B.at(i+1)%=mod.at(0);
-        }
-        vel C(A.size(),0);
-        rep(i,0,C.size())C.at(i)=(A.at(i)*B.at(i))%mod.at(0);
-        rrep(i,now-1,0){
-            C.at(i+1)+=mod.at(0)-C.at(i);
-            C.at(i+1)%=mod.at(0);
-        }
-        return C;
-    }
-
-    vel MIN(){
-        rrep(i,now-1,0){
-            A.at(i)+=A.at(i+1);
-            A.at(i)%=mod.at(0);
-        }
-        rrep(i,now-1,0){
-            B.at(i)+=B.at(i+1);
-            B.at(i)%=mod.at(0);
-        }
-        vel C(A.size(),0);
-        rep(i,0,C.size())C.at(i)=(A.at(i)*B.at(i))%mod.at(0);
-        rep(i,0,now-1){
-            C.at(i)+=mod.at(0)-C.at(i+1);
-            C.at(i)%=mod.at(0);
-        }
-        return C;
-    }
-
-    vel GCD(){//faが与えられていると思っている
-        vel C(now,0);
-        rep(i,0,now) C.at(i)=(A.at(i)*B.at(i));
-        rrep(i,now,1){
-            ll j=2;
-            while(j*i<now){
-                C.at(i)-=C.at(i*j);
-                j++;
-            }
-        }
-        return C;
-    }
-    /*gcd畳み込みは1に向けて累積和して各点積するだけ
-    rep(i,1,R+1){
-        ll now=2;
-        while(now*i<a.size()){
-            a.at(i)+=b.at(i*now);
-            now++;
-        }
-    }
-    //rep(i,0,a.size())cout<<i<<" "<<a.at(i)<<endl;
-    vel ans(R+1);
-    rep(i,0,R+1)ans.at(i)=a.at(i)*a.at(i);
-    rrep(i,R+1,1){
-        ll now=2;
-        while(now*i<ans.size()){
-            ans.at(i)-=ans.at(i*now);
-            now++;
-        }
-    }
-    */
 };
 
-int main(){
-    cin>>N>>M;
-    vel a(N),b(M);
-    rep(i,0,N) cin>>a.at(i);
-    rep(i,0,M) cin>>b.at(i);
-    rep(i,0,N) a.at(i)%=inf;
-    rep(i,0,M) b.at(i)%=inf;
-    cnv cnv;
-    cnv.set(a,b);
-    vel A=cnv.SUM(false);
-    rep(i,0,a.size()+b.size()-1){
-        cout<<A.at(i)<<" ";
+mint get(ll k,vem& f,vem &g){
+    if(k==0){
+        return f[0]/g[0];
+    }else{
+        vem mg=g;
+        rep(i,1,g.size()){
+            mg[i]*=-1;
+            i++;
+        }
+        cnv<mint> CNV(f,mg);
+        vem nf=CNV.conv();
+        cnv<mint> CNV1(g,mg);
+        vem ng=CNV1.conv();
+        if(k%2){
+            vem nnf;
+            rep(i,1,nf.size()){
+                nnf.push_back(nf[i]);
+                i++;
+            }
+            vem nng(g.size());
+            rep(i,0,g.size())nng[i]=ng[i*2];
+            return get(k/2,nnf,nng);
+        }else{
+            vem nnf;
+            rep(i,0,nf.size()){
+                nnf.push_back(nf[i]);
+                i++;
+            }
+            vem nng(g.size());
+            rep(i,0,g.size())nng[i]=ng[i*2];
+            return get(k/2,nnf,nng);
+        }
     }
 }
 
-/*
-g++ a.cpp -std=c++20
-*/
+int main(){
+    cin>>N>>M;
+    vem ans={1};
+    rep(i,0,N){
+        cin>>x;
+        vem f(x+1,0);
+        f[0]=1;
+        f[x]=-1;
+        cnv<mint> CNV(ans,f);
+        ans=CNV.conv();
+    }
+    vem f(2);
+    f[0]=1;
+    f[1]=-1;
+    cnv<mint> CNV(ans,f);
+    ans=CNV.conv();
+    f={1};
+    cout<<get(M,f,ans);
+}
